@@ -14,8 +14,16 @@ router.delete('/:orderID', (req, res, next)=> {
     })
 })
 router.post('/', (req, res, next)=> {
+
+    const order = {
+        productID: req.body.productID,
+        quantity: req.body.quantity
+    }
+
     res.status(200).json({
-        message: 'Orders posted'
+        message: 'Orders posted',
+        order: order
+
     })
 })
 

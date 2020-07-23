@@ -10,9 +10,12 @@ mongoose.connect('mongodb+srv://Adarsh:'+process.env.MONGO_ATLAS_PW+'@cluster0.o
     useUnifiedTopology: true
 })
 
+app.use('/uploads',express.static('uploads'))
 
 const productRoutes = require('./APIs/routes/product')
 const orderRoutes = require('./APIs/routes/orders')
+const UserRoutes = require('./APIs/routes/user')
+
 
 app.use((req, res, next)=> {
     res.header('Acsess-Control-Allow-Origin', '*'),
@@ -35,6 +38,7 @@ app.use(bodyParser.json())
 
 app.use('/products', productRoutes)
 app.use('/orders', orderRoutes)
+app.use('/user', UserRoutes)
 
 app.use((req, res, next) => {
     const error = new Error("Not Found")

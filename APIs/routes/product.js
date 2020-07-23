@@ -1,13 +1,38 @@
 const express = require('express')
 const mongoose = require('mongoose')
-
+const multer = require('multer')
 const router = express.Router()
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, './uploads')
+    },
+    filename: function(req, file, cb){
+        cb(null, new Date().toISOString() + file.originalname)
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg')
+    cb(null, true)
+    else
+    cb(new Error('file format should be either jpeg or png'), false)
+}
+
+const upload = multer({
+    storage: storage, 
+    limits:{
+    fileSize: 1024*1024*6,
+    },
+    fileFilter : fileFilter
+})
+
 
 const Product = require('../models/product')
 
 router.get('/', (req, res, next)=>{
     Product.find()
-    .select('name pride_id')
+    .select('name pride_id productImage')
     .exec()
     .then(docs=> {
         const response = {
@@ -17,6 +42,7 @@ router.get('/', (req, res, next)=>{
                     name: doc.name,
                     price: doc.price,
                     _id: doc._id,
+                    productImage: doc.productImage,
                     request : {
                         type: 'GET',
                         url: 'http://localhost:5000/products/' + doc._id
@@ -34,43 +60,42 @@ router.get('/', (req, res, next)=>{
     })
 })
 
-router.post('/', (req, res, next)=> {
-
+router.post("/", upload.single('productImage'), (req, res, next) => {
     const product = new Product({
-        _id: new mongoose.Types.ObjectId(),
-        name: req.body.name,
-        price: req.body.price
-    })
+      _id: new mongoose.Types.ObjectId(),
+      name: req.body.name,
+      price: req.body.price,
+      productImage: req.file.path 
+    });
     product
-    .save()
-    .then(result => {
-      console.log(result);
-      res.status(201).json({
-        message: "Created product successfully",
-        createdProduct: {
-            name: result.name,
-            price: result.price,
-            _id: result._id,
-            request: {
-                type: 'GET',
-                url: "http://localhost:5000/products/" + result._id
-            }
-        }
-      });
-    })
-    .catch(err => {
-        console.log(err)
+      .save()
+      .then(result => {
+        console.log(result);
+        res.status(201).json({
+          message: "Created product successfully",
+          createdProduct: {
+              name: result.name,
+              price: result.price,
+              _id: result._id,
+              request: {
+                  type: 'GET',
+                  url: "http://localhost:3000/products/" + result._id
+              }
+          }
+        });
+      })
+      .catch(err => {
+        console.log(err);
         res.status(500).json({
-            error:err
-        })
-    })
-
-    
-})
+          error: err
+        });
+      });
+  });
 
 router.get('/:productID', (req, res, next)=> {
     const id = req.params.productID
     Product.findById(id).exec()
+    .select('name pride_id productImage')
     .then(
         doc => {
         if(doc){

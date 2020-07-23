@@ -73,7 +73,6 @@ router.get('/:productID', (req, res, next)=> {
     Product.findById(id).exec()
     .then(
         doc => {
-            console.log(doc)
         if(doc){
             res.status(200).json(doc)
         }else{

@@ -96,7 +96,7 @@ router.post('/forgot', (req, res, next)=> {
                             error: err
                         })
                     } else {
-                        user.update({password: hash})
+                        User.update({email:req.body.email},{password: hash})
                         .exec()
                         .then(result => {
                             console.log(result);

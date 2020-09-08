@@ -5,7 +5,7 @@ const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 
 
-mongoose.connect('mongodb+srv://Adarsh:'+process.env.MONGO_ATLAS_PW+'@cluster0.obrzl.mongodb.net/<dbname>?retryWrites=true&w=majority', {
+mongoose.connect('{mongoDB connection string}', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
